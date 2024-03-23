@@ -12,12 +12,15 @@
       </div>
       <button type="submit" class="btn btn-primary">Add Classroom</button>
     </form>
-
-    <h2>Book Classroom</h2>
+      <h2>Book Classroom</h2>
+    <!-- Book Classroom form -->
     <form class="form" @submit.prevent="bookClassroom">
       <div class="form-group">
-        <label for="classroom_id">Classroom ID:</label>
-        <input type="text" id="classroom_id" v-model.number="classroom_id" class="form-control">
+        <label for="classroom_id">Classroom:</label>
+        <select v-model="selectedClassroomId" class="form-control">
+
+          <option v-for="classroom in classrooms" :key="classroom.id" :value="classroom.id">{{ classroom.classroom_name }}</option>
+        </select>
       </div>
       <div class="form-group">
         <label for="date">Date:</label>
@@ -35,7 +38,7 @@
 <style>
 .container {
 
-  width: 300px;
+  width: 80%;
   border-radius: 20px;
   border: 1px solid #ccc;
   background-color: #2f2f2f;
@@ -83,36 +86,52 @@ input[type="date"] {
 
 
 <script>
-import axios from 'axios';
-
-const baseURL = 'http://localhost:5000'; // Assuming your server is running on localhost and port 5000
+  import axios from 'axios';
 
 export default {
   data() {
     return {
+      classrooms: []  ,
+      selectedClassroomId: null,
+      date: '',
+      purpose: '',
       location: '',
       classroom_name: '',
-      classroom_id: null,
       date: '',
-      purpose: ''
     };
+  },
+  mounted() {
+    this.fetchClassrooms();
   },
   methods: {
     addClassroom() {
-      axios.post(`${baseURL}/classrooms`, {
-        location: this.location,
-        classroom_name: this.classroom_name
-      })
-      .then(response => {
-        console.log(response.data);
-      })
-      .catch(error => {
-        console.error(error);
-      });
+        axios.post('http://127.0.0.1:5000/classrooms', {
+          location: this.location,
+          classroom_name: this.classroom_name
+        })
+        .then(response => {
+          console.log(response.data);
+        })
+        .catch(error => {
+          console.error(error);
+        });
+      },
+    fetchClassrooms() {
+      axios.get('http://127.0.0.1:5000/classrooms')
+        .then(response => {
+          this.classrooms = response.data.classrooms
+          console.log(this.classrooms)
+        })
+        .catch(error => {
+          console.error(error);
+        });
     },
     bookClassroom() {
-      axios.post(`${baseURL}/bookings`, { // Modified URL for posting bookings
-        classroom_id: this.classroom_id,
+        console.log(this.selectedClassroomId)
+        console.log()
+      axios.post('http://127.0.0.1:5000/bookings', {
+        
+        classroom_id: this.selectedClassroomId,
         date: this.date,
         purpose: this.purpose
       })
@@ -125,5 +144,4 @@ export default {
     }
   }
 };
-
 </script>

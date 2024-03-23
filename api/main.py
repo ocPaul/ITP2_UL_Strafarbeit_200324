@@ -1,8 +1,13 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
+
+from datetime import datetime
 
 app = Flask(__name__)
+CORS(app, origins='http://localhost:5173')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///classrooms.db'
+
 db = SQLAlchemy(app)
 
 class Classroom(db.Model):
@@ -45,7 +50,7 @@ def book_classroom():
     classroom = Classroom.query.get(classroom_id)
     if not classroom:
         return jsonify({'message': 'Classroom not found'}), 404
-    new_booking = Booking(classroom_id=classroom_id, date=date, purpose=purpose)
+    new_booking = Booking(classroom_id=classroom_id, date=datetime.strptime(date, '%Y-%m-%d').date(), purpose=purpose)
     db.session.add(new_booking)
     db.session.commit()
     return jsonify({'message': 'Classroom booked successfully'})
